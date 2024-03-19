@@ -1,0 +1,224 @@
+syntax = "proto3";
+option go_package = "./messages";
+
+// for use in other messages only
+message ChunkInfo {
+    int64 size = 1;
+    repeated string hosts = 2;
+    int64 position = 3;
+}
+
+// for use in other messages only
+message NodeInfo {
+    string host = 1;
+    int64 space_aval = 2;
+    int64 processed = 3;
+}
+
+// wrapper of wrappers
+message Wrapper {
+    oneof msg {
+        C2C client_controller = 1;
+        C2S client_storage = 2;
+        Beat heart_beat = 3;
+        Replicate replicate = 4;
+        NodeCollapse node_collapse = 5;
+        ReplicateRequest replicate_request = 6;
+        Delete delete = 7;
+    }
+}
+
+// client to controller 
+/* called by client to store a file */
+message StorageRequest {
+    string fileName = 1;
+    int64 size = 2;
+    string chunk = 3;
+    int64 position = 4;
+}
+
+/* response from controller for put request */
+message StorageResponse {
+    bool okay = 1;
+    string host = 2;
+    string repHost1 = 3;
+    string repHost2 = 4;
+}
+
+/* called by client to retrieve a file */
+message RetrieveRequest {
+    string fileName = 1;
+}
+
+/* response from controller with where to get the data */
+message RetrieveResponse {
+    int64 size = 1;
+    map<string, ChunkInfo> chunks = 2;
+}
+
+/* request list of all file names */
+message ListRequest {}
+
+/* lists all files stored currently */
+message ListFiles {
+    repeated string filename = 1;
+}
+
+/* delete a file */
+message Delete {
+    string filename = 1;
+}
+
+/* request list of all nodes and their metadata */
+message ListNodesRequest {}
+
+/* lists all nodes and their metadata */
+message ListNodesResponse {
+    repeated NodeInfo nodes = 1;
+}
+
+message C2C {
+    oneof msg {
+        StorageRequest storage_request = 1;
+        RetrieveRequest retrieve_request = 2;
+        StorageResponse storage_response = 3;
+        RetrieveResponse retrieve_response = 4;
+        ListRequest list_request = 5;
+        ListFiles list_files = 6;
+        ListNodesRequest list_nodes_request = 8;
+        ListNodesResponse list_nodes_reponse = 9;
+    }
+}
+
+
+// client to storage nodes
+/* store a chunk */
+message PutRequest {
+    int64 size = 1;
+    string chunk = 2;
+    string repHost1 = 3;
+    string repHost2 = 4;
+    bytes data = 5;
+}
+
+/* response to storing a chunk */
+message PutResponse {
+    bool okay = 1;
+}
+
+/* retrieve a chunk */
+message GetRequest {
+    string chunk = 1;
+}
+
+/* response to retrieving a chunk */
+message GetResponse {
+    int64 size = 1;
+    bytes data = 2;
+}
+
+message C2S {
+    oneof msg {
+        PutRequest put_request = 1;
+        GetRequest get_request = 2;
+        PutResponse put_response = 3;
+        GetResponse get_response = 4;
+    }
+}
+
+// storage nodes to controller
+/* sent from storage node to controller as heart beat */
+message Thump {
+    int64 nodeid = 1;
+    int64 space = 2;
+    int64 processed = 3;
+}
+
+/* sent from controller to storage node to as a response to connect/heart beat */
+message Bump {
+    bool okay = 1;
+    int64 nodeid = 2;
+}
+
+/* sent from storage node to controller to request to be added to the system */
+message Connect {
+    int64 space = 1;
+    string host = 2;
+}
+
+/* request a host to get a chunk that was corrupted */
+message ChunkRequest {
+    string host = 1;
+    string chunk_id = 2;
+}
+
+/* host that has non corrupted chunk */
+message ChunkResponse {
+    string host = 1;
+}
+
+/* begins the mapping phase of distributed computation */
+message Execute {
+    repeated string chunks = 1;
+    string job_name = 2;
+    string method = 3;
+    repeated string reducers = 4;
+}
+
+/* sent from mapper to reducer */
+message Shuffle {
+    bytes key = 1;
+    bytes value = 2;
+    string job_name = 3;
+    string method = 4;
+}
+
+/* sent from computation manager to reducer to begin reducing */
+message Reduce {
+    string job_name = 1;
+    string method = 2;
+}
+
+/* results sent from storage node to computation manager */
+message Results {
+    bytes results = 1;
+    string job_name = 2;
+    string method = 3;
+}
+
+/* report from node to computational manager */
+message Report {
+    int64 report_type = 1;
+    string job_name = 2;
+    string method = 3;
+}
+
+message Beat {
+    oneof msg {
+        Thump thump_message = 1;
+        Bump bump_message = 2;
+        Connect connect_message = 3;
+        ChunkRequest chunk_request = 4;
+        ChunkResponse chunk_reponse = 5;
+        Execute execute = 6;
+        Shuffle shuffle = 7;
+        Results results = 8;
+        Report report = 9;
+        Reduce reduce = 10;
+    }
+}
+
+message ReplicateRequest {
+    string chunk_id = 1;
+}
+
+//storage node to storage node
+message Replicate {
+    string chunk_id = 1;
+    bytes data = 2;
+}
+
+message NodeCollapse {
+    string chunk = 1;
+    string new_host = 2;
+}
