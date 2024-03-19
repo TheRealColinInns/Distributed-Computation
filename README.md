@@ -9,6 +9,7 @@ INIT:
  - Storage nodes must send a heart beat every 5 seconds, after 10 seconds with no heart beat the controller will consider the node dead
  - Each heart beat must contain the space available on the node and the number of requests processed
  - If a node dies it must go through the connecting process again
+ - Set up the computation manager like so: ./comp_manager \<file name\> \<job file name\> \<method name\> \<number of reducers\>
  
 Storage:
  - Client sends meta data for file they wish to store to controller as well as a chunk size (PUT request)
