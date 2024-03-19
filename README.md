@@ -1,5 +1,5 @@
 # Distributed-Computation
-My personal implementation of HADOOP inspired distributed computation engine.
+My personal implementation of HADOOP inspired distributed computation engine and distributed file system.
 
 # Design and Usage
 
