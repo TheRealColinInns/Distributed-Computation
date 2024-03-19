@@ -22,9 +22,9 @@ Retrieval:
  - Client requests the chunks from the storage nodes at the location specified by the controller (Retrieve request)
 
 INTERFACE:
- - Store: ./client put <file> <chunk size>*
- - Retrieve: ./client get <file>
- - Delete: ./client delete <file>
+ - Store: ./client put \<file\> \<chunk size\>*
+ - Retrieve: ./client get \<file\>
+ - Delete: ./client delete \<file\>
  - List Files: ./client ls
  - List Nodes: ./client lsn
  
